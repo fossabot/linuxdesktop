@@ -1,35 +1,10 @@
 ---
 version: "3.5"
 vars:
-  ACTIONLINT_EXTRA_ARGS: '{{.ACTIONLINT_EXTRA_ARGS | default ""}}'
-  ACTIONLINT_NIX_INSTALLABLE: '{{.ACTIONLINT_NIX_INSTALLABLE | default "nixpkgs#actionlint"}}'
-  ACTIONLINT_TARGETS: '{{.ACTIONLINT_TARGETS | default ""}}'
-  ADRS_EXTRA_ARGS: '{{.ADRS_EXTRA_ARGS | default ""}}'
-  ADRS_NIX_INSTALLABLE: '{{.ADRS_NIX_INSTALLABLE | default "nixpkgs#adrs"}}'
-  GOLANGCI_LINT_FMT_FORMATTER_FLAGS: >-
-    {{.GOLANGCI_LINT_FMT_FORMATTER_FLAGS | default "-E gci -E gofmt -E gofumpt
-    -E goimports -E golines"}}
-  GOLANGCI_LINT_NIX_INSTALLABLE: '{{.GOLANGCI_LINT_NIX_INSTALLABLE | default "nixpkgs#go nixpkgs#golangci-lint"}}'
-  GOVULNCHECK_NIX_INSTALLABLE: '{{.GOVULNCHECK_NIX_INSTALLABLE | default "nixpkgs#go nixpkgs#govulncheck"}}'
-  GO_FUZZTIME: '{{.GO_FUZZTIME | default ""}}'
-  GO_JUNIT_REPORT_IN: '{{.GO_JUNIT_REPORT_IN | default ""}}'
-  GO_JUNIT_REPORT_NIX_INSTALLABLE: '{{.GO_JUNIT_REPORT_NIX_INSTALLABLE | default "nixpkgs#go-junit-report"}}'
-  GO_JUNIT_REPORT_OUT: '{{.GO_JUNIT_REPORT_OUT | default ""}}'
   GO_NIX_INSTALLABLE: '{{.GO_NIX_INSTALLABLE | default "nixpkgs#go"}}'
-  YAMLFIX_EXTRA_ARGS: '{{.YAMLFIX_EXTRA_ARGS | default ""}}'
-  YAMLFIX_NIX_INSTALLABLE: '{{.YAMLFIX_NIX_INSTALLABLE | default "nixpkgs#yamlfix"}}'
-  YAMLFIX_TARGETS: '{{.YAMLFIX_TARGETS | default "."}}'
-  YAMLLINT_CONFIG: '{{.YAMLLINT_CONFIG | default ""}}'
-  YAMLLINT_EXTRA_ARGS: '{{.YAMLLINT_EXTRA_ARGS | default ""}}'
-  YAMLLINT_NIX_INSTALLABLE: '{{.YAMLLINT_NIX_INSTALLABLE | default "nixpkgs#yamllint"}}'
-  YAMLLINT_TARGETS: '{{.YAMLLINT_TARGETS | default "."}}'
-  ZIZMOR_EXTRA_ARGS: '{{.ZIZMOR_EXTRA_ARGS | default "--offline"}}'
-  ZIZMOR_NIX_INSTALLABLE: '{{.ZIZMOR_NIX_INSTALLABLE | default "nixpkgs#zizmor"}}'
-  ZIZMOR_TARGETS: '{{.ZIZMOR_TARGETS | default ".github"}}'
-  ACTIONLINT_WINGET_INSTALLABLE: '{{.ACTIONLINT_WINGET_INSTALLABLE | default "rhysd.actionlint"}}'
-  ADRS_CARGO_CRATE: '{{.ADRS_CARGO_CRATE | default "adrs"}}'
-  GOLANGCI_LINT_WINGET_INSTALLABLE: '{{.GOLANGCI_LINT_WINGET_INSTALLABLE | default "GolangCI.golangci-lint"}}'
-  GO_JUNIT_REPORT_GO_PKG: '{{.GO_JUNIT_REPORT_GO_PKG | default "github.com/jstemmer/go-junit-report/v2@latest"}}'
+  GO_WINGET_INSTALLABLE: '{{.GO_WINGET_INSTALLABLE | default "GoLang.Go"}}'
+  GO_FUZZTIME: '{{.GO_FUZZTIME | default ""}}'
+  GO_PKG: '{{.GO_PKG | default ""}}'
   GO_LOAD: >-
     {{.GO_LOAD | default `
     \$u = [Environment]::GetEnvironmentVariable('Path', 'User');
@@ -39,11 +14,58 @@ vars:
       if (Test-Path -LiteralPath \$goBin) { \$env:Path = \$goBin + ';' + \$env:Path }
     }
     `}}
-  GO_PKG: '{{.GO_PKG | default ""}}'
-  GO_WINGET_INSTALLABLE: '{{.GO_WINGET_INSTALLABLE | default "GoLang.Go"}}'
-  YAMLFIX_UV_TOOL: '{{.YAMLFIX_UV_TOOL | default "yamlfix"}}'
+  GOLANGCI_LINT_NIX_INSTALLABLE: '{{.GOLANGCI_LINT_NIX_INSTALLABLE | default "nixpkgs#go nixpkgs#golangci-lint"}}'
+  GOLANGCI_LINT_WINGET_INSTALLABLE: '{{.GOLANGCI_LINT_WINGET_INSTALLABLE | default "GolangCI.golangci-lint"}}'
+  GOVULNCHECK_NIX_INSTALLABLE: '{{.GOVULNCHECK_NIX_INSTALLABLE | default "nixpkgs#go nixpkgs#govulncheck"}}'
+  GOLANGCI_LINT_FMT_FORMATTER_FLAGS: >-
+    {{.GOLANGCI_LINT_FMT_FORMATTER_FLAGS | default "-E gci -E gofmt -E gofumpt
+    -E goimports -E golines"}}
+  ACTIONLINT_NIX_INSTALLABLE: '{{.ACTIONLINT_NIX_INSTALLABLE | default "nixpkgs#actionlint"}}'
+  ACTIONLINT_WINGET_INSTALLABLE: '{{.ACTIONLINT_WINGET_INSTALLABLE | default "rhysd.actionlint"}}'
+  ACTIONLINT_EXTRA_ARGS: '{{.ACTIONLINT_EXTRA_ARGS | default ""}}'
+  ACTIONLINT_TARGETS: '{{.ACTIONLINT_TARGETS | default ""}}'
+  YAMLLINT_NIX_INSTALLABLE: '{{.YAMLLINT_NIX_INSTALLABLE | default "nixpkgs#yamllint"}}'
   YAMLLINT_UV_TOOL: '{{.YAMLLINT_UV_TOOL | default "yamllint"}}'
+  YAMLLINT_TARGETS: '{{.YAMLLINT_TARGETS | default "."}}'
+  YAMLLINT_CONFIG: '{{.YAMLLINT_CONFIG | default ""}}'
+  YAMLLINT_EXTRA_ARGS: '{{.YAMLLINT_EXTRA_ARGS | default ""}}'
+  YAMLFIX_NIX_INSTALLABLE: '{{.YAMLFIX_NIX_INSTALLABLE | default "nixpkgs#yamlfix"}}'
+  YAMLFIX_UV_TOOL: '{{.YAMLFIX_UV_TOOL | default "yamlfix"}}'
+  YAMLFIX_TARGETS: '{{.YAMLFIX_TARGETS | default "."}}'
+  YAMLFIX_EXTRA_ARGS: '{{.YAMLFIX_EXTRA_ARGS | default ""}}'
+  ZIZMOR_EXTRA_ARGS: '{{.ZIZMOR_EXTRA_ARGS | default "--offline"}}'
+  ZIZMOR_TARGETS: '{{.ZIZMOR_TARGETS | default ".github"}}'
+  ZIZMOR_NIX_INSTALLABLE: '{{.ZIZMOR_NIX_INSTALLABLE | default "nixpkgs#zizmor"}}'
   ZIZMOR_WINGET_INSTALLABLE: '{{.ZIZMOR_WINGET_INSTALLABLE | default "zizmor.zizmor"}}'
+  ADRS_NIX_INSTALLABLE: '{{.ADRS_NIX_INSTALLABLE | default "nixpkgs#adrs"}}'
+  ADRS_CARGO_CRATE: '{{.ADRS_CARGO_CRATE | default "adrs"}}'
+  ADRS_EXTRA_ARGS: '{{.ADRS_EXTRA_ARGS | default ""}}'
+  GO_JUNIT_REPORT_NIX_INSTALLABLE: '{{.GO_JUNIT_REPORT_NIX_INSTALLABLE | default "nixpkgs#go-junit-report"}}'
+  GO_JUNIT_REPORT_GO_PKG: '{{.GO_JUNIT_REPORT_GO_PKG | default "github.com/jstemmer/go-junit-report/v2@latest"}}'
+  GO_JUNIT_REPORT_IN: '{{.GO_JUNIT_REPORT_IN | default ""}}'
+  GO_JUNIT_REPORT_OUT: '{{.GO_JUNIT_REPORT_OUT | default ""}}'
+  TRIVY_IMAGE: '{{.TRIVY_IMAGE | default ""}}'
+  TRIVY_FS_TARGET: '{{.TRIVY_FS_TARGET | default "."}}'
+  TRIVY_SCANNERS: '{{.TRIVY_SCANNERS | default "vuln,misconfig,secret,license"}}'
+  TRIVY_IMAGE_ARGS: >-
+    {{.TRIVY_IMAGE_ARGS | default (printf `--scanners %s
+    --image-config-scanners misconfig,secret
+    --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL --exit-code 1 --exit-on-eol 1
+    --detection-priority comprehensive --ignore-unfixed=false --license-full
+    --removed-pkgs --include-deprecated-checks --no-progress` .TRIVY_SCANNERS)}}
+  TRIVY_FS_ARGS: >-
+    {{.TRIVY_FS_ARGS | default (printf `--scanners %s
+    --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL --exit-code 1
+    --detection-priority comprehensive --ignore-unfixed=false --license-full
+    --include-dev-deps --include-deprecated-checks --no-progress` .TRIVY_SCANNERS)}}
+  TRIVY_IMAGE_EXTRA_ARGS: '{{.TRIVY_IMAGE_EXTRA_ARGS | default ""}}'
+  TRIVY_FS_EXTRA_ARGS: '{{.TRIVY_FS_EXTRA_ARGS | default ""}}'
+  TRIVY_NIX_INSTALLABLE: '{{.TRIVY_NIX_INSTALLABLE | default "nixpkgs#trivy"}}'
+  TRIVY_WINGET_INSTALLABLE: '{{.TRIVY_WINGET_INSTALLABLE | default "AquaSecurity.Trivy"}}'
+  RUMDL_TARGETS: '{{.RUMDL_TARGETS | default "."}}'
+  RUMDL_EXTRA_ARGS: '{{.RUMDL_EXTRA_ARGS | default ""}}'
+  RUMDL_NIX_INSTALLABLE: '{{.RUMDL_NIX_INSTALLABLE | default "nixpkgs#rumdl"}}'
+  RUMDL_WINGET_INSTALLABLE: '{{.RUMDL_WINGET_INSTALLABLE | default "rvben.rumdl"}}'
 includes:
   go:
     taskfile: go/Taskfile.yml
@@ -112,6 +134,27 @@ includes:
       ADRS_NIX_INSTALLABLE: '{{.ADRS_NIX_INSTALLABLE}}'
       ADRS_EXTRA_ARGS: '{{.ADRS_EXTRA_ARGS}}'
       ADRS_CARGO_CRATE: '{{.ADRS_CARGO_CRATE}}'
+  trivy:
+    taskfile: trivy/Taskfile.yml
+    dir: ..
+    vars:
+      TRIVY_IMAGE: '{{.TRIVY_IMAGE}}'
+      TRIVY_FS_TARGET: '{{.TRIVY_FS_TARGET}}'
+      TRIVY_SCANNERS: '{{.TRIVY_SCANNERS}}'
+      TRIVY_IMAGE_ARGS: '{{.TRIVY_IMAGE_ARGS}}'
+      TRIVY_FS_ARGS: '{{.TRIVY_FS_ARGS}}'
+      TRIVY_IMAGE_EXTRA_ARGS: '{{.TRIVY_IMAGE_EXTRA_ARGS}}'
+      TRIVY_FS_EXTRA_ARGS: '{{.TRIVY_FS_EXTRA_ARGS}}'
+      TRIVY_NIX_INSTALLABLE: '{{.TRIVY_NIX_INSTALLABLE}}'
+      TRIVY_WINGET_INSTALLABLE: '{{.TRIVY_WINGET_INSTALLABLE}}'
+  rumdl:
+    taskfile: rumdl/Taskfile.yml
+    dir: ..
+    vars:
+      RUMDL_TARGETS: '{{.RUMDL_TARGETS}}'
+      RUMDL_EXTRA_ARGS: '{{.RUMDL_EXTRA_ARGS}}'
+      RUMDL_NIX_INSTALLABLE: '{{.RUMDL_NIX_INSTALLABLE}}'
+      RUMDL_WINGET_INSTALLABLE: '{{.RUMDL_WINGET_INSTALLABLE}}'
 tasks:
   ci:
     desc: Run ci for synced TaskOtter modules
@@ -120,11 +163,13 @@ tasks:
       - task: actionlint:ci
       - task: yamllint:ci
       - task: zizmor:ci
+      - task: rumdl:ci
   ci:fix:
     desc: Run ci:fix for synced TaskOtter modules
     cmds:
       - task: golangci-lint:ci:fix
       - task: yamlfix:ci:fix
+      - task: rumdl:ci:fix
   install:
     desc: Run install for synced TaskOtter modules
     cmds:
@@ -136,6 +181,8 @@ tasks:
       - task: zizmor:install
       - task: adrs:install
       - task: go-junit-report:install
+      - task: trivy:install
+      - task: rumdl:install
   verify:
     desc: Run verify for synced TaskOtter modules
     cmds:
@@ -152,6 +199,8 @@ tasks:
       - task: zizmor:version
       - task: adrs:version
       - task: go-junit-report:version
+      - task: trivy:version
+      - task: rumdl:version
   which:
     desc: Run which for synced TaskOtter modules
     cmds:

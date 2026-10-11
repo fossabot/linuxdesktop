@@ -1,6 +1,6 @@
 # WinGet Taskfile Public Tasks
 
-## What is this Taskfile?
+## What Is This Taskfile?
 
 A Taskfile for installing, upgrading, and uninstalling packages with
 [WinGet](https://learn.microsoft.com/windows/package-manager/winget/), the
@@ -39,7 +39,7 @@ task winget:install:package WINGET_INSTALLABLE=Git.Git
 task winget:upgrade WINGET_INSTALLABLE=Git.Git
 ```
 
-### From another module
+### From Another Module
 
 ```yaml
 includes:
@@ -47,17 +47,17 @@ includes:
     taskfile: ../winget/Taskfile.yml
 
 vars:
-  JQ_WINGET_INSTALLABLE: '{{.JQ_WINGET_INSTALLABLE | default "jqlang.jq"}}'
+  GO_WINGET_INSTALLABLE: '{{.GO_WINGET_INSTALLABLE | default "GoLang.Go"}}'
 
 tasks:
   install:
     cmds:
       - task: winget:install:package
         vars:
-          WINGET_INSTALLABLE: '{{.JQ_WINGET_INSTALLABLE}}'
+          WINGET_INSTALLABLE: '{{.GO_WINGET_INSTALLABLE}}'
 ```
 
-## Auto-install behaviour
+## Auto-Install Behaviour
 
 `version`, `install:package`, `uninstall`, and `upgrade` install WinGet first
 if it is missing.
@@ -112,7 +112,7 @@ with `Install-Module Microsoft.WinGet.Client` and
 
 ```sh
 task install:package WINGET_INSTALLABLE=Git.Git
-task install:package WINGET_INSTALLABLE=jqlang.jq WINGET_VERSION=1.7.1
+task install:package WINGET_INSTALLABLE=GoLang.Go WINGET_VERSION=1.24.0
 task install:package WINGET_INSTALLABLE=GoLang.Go WINGET_SCOPE=user
 ```
 
