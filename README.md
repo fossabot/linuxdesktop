@@ -1,4 +1,4 @@
-# linuxdesktop
+# Linuxdesktop
 
 
 [![LICENSE](https://img.shields.io/github/license/gostafa/linuxdesktop)](/LICENSE) [![codecov](https://codecov.io/gh/gostafa/linuxdesktop/graph/badge.svg)](https://codecov.io/gh/gostafa/linuxdesktop) [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/gostafa/linuxdesktop?utm_source=badge) [![Go Reference](https://pkg.go.dev/badge/github.com/gostafa/linuxdesktop)](https://pkg.go.dev/github.com/gostafa/linuxdesktop)
@@ -23,7 +23,7 @@ go get github.com/gostafa/linuxdesktop
 Import `github.com/gostafa/linuxdesktop` in your application. Commit `go.mod` and
 `go.sum` to keep dependency versions reproducible.
 
-### Runtime requirements
+### Runtime Requirements
 
 Run detection on Linux, preferably as the logged-in desktop user. Results depend
 on the process's environment and access to display sockets, D-Bus, `/proc`, and
@@ -40,7 +40,7 @@ On other operating systems, detection returns a non-nil, headless environment
 and an error matching `ErrNotLinux`. This allows cross-platform applications to
 import the package and handle the unsupported platform explicitly.
 
-## Quick start
+## Quick Start
 
 Save this as `main.go` in your application:
 
@@ -158,7 +158,7 @@ EGL probe lifecycles are serialized to avoid overlapping initialization and
 termination of a shared display. A native driver call already in progress cannot
 be interrupted by the Go context.
 
-## Results and convenience helpers
+## Results and Convenience Helpers
 
 `Environment` contains the following fields:
 
@@ -182,26 +182,26 @@ checks. They do not connect to display servers; use `Display()` or the display
 section of `DetectContext` to check actual connections. Both X11 and Wayland can
 be available in the same session.
 
-## Best practices
+## Best Practices
 
-- **Keep partial results.** Log or handle probe errors while retaining successful
+* **Keep partial results.** Log or handle probe errors while retaining successful
   data. Use `errors.Is(err, linuxdesktop.ErrNotLinux)` for platform checks because
   errors may be wrapped or joined.
-- **Request only what you use.** Select relevant sections and use positive timeout
+* **Request only what you use.** Select relevant sections and use positive timeout
   values appropriate to your application's responsiveness requirements.
-- **Detect outside hot paths.** Cache a snapshot when appropriate and refresh it
+* **Detect outside hot paths.** Cache a snapshot when appropriate and refresh it
   when the session changes. Display connections and optional driver queries have
   a cost.
-- **Treat unknown values as normal.** Identity fields may contain
+* **Treat unknown values as normal.** Identity fields may contain
   `linuxdesktop.Unknown`; other unavailable details may be empty or zero-valued.
   Check `env.Display.X11` and `env.Display.Wayland` for nil before reading them.
-- **Use confidence and capability fields.** Consider `Compositor.Confidence` and
+* **Use confidence and capability fields.** Consider `Compositor.Confidence` and
   `Compositor.DetectedBy` when interpreting identification. Check the specific
   portal interface you need instead of assuming it exists from the desktop name.
-- **Run in the intended user's session.** Running through `sudo` or in an isolated
+* **Run in the intended user's session.** Running through `sudo` or in an isolated
   container can change environment variables and service access. Preserve the
   real session environment rather than inventing display or D-Bus addresses.
-- **Share diagnostics carefully.** Results can include a hostname, user/session
+* **Share diagnostics carefully.** Results can include a hostname, user/session
   identifiers, and GPU details. Remove information you do not need before sending
   diagnostic output elsewhere.
 
