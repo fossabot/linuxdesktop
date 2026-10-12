@@ -11,17 +11,17 @@ import (
 )
 
 func displayAddress(display string) (*displayTarget, error) {
-	colon := strings.LastIndex(display, displaySeparator)
-	if colon < zero {
+	before, after, ok := strings.CutLast(display, displaySeparator)
+	if !ok {
 		return nil, fmt.Errorf(detailErrorFormat, errInvalidDisplay, display)
 	}
 
-	target, err := displayNumbers(display[colon+oneWord:])
+	target, err := displayNumbers(after)
 	if err != nil {
 		return nil, fmt.Errorf("parse display numbers: %w", err)
 	}
 
-	setDisplayAddress(target, display[:colon], beforeScreen(display[colon+oneWord:]))
+	setDisplayAddress(target, before, beforeScreen(after))
 
 	return target, nil
 }
