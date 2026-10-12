@@ -26,7 +26,8 @@ func serverConnection(t *testing.T, mode string) *connection {
 	if err != nil {
 		t.Fatal(err)
 	}
-	owned := &connection{Conn: conn, transport: client}
+	owned := newConnection(client)
+	owned.Conn = conn
 	t.Cleanup(owned.Close)
 	return owned
 }

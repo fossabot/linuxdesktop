@@ -25,7 +25,6 @@ type (
 	Probe = Func[domain.Env, *domain.X11Info]
 
 	// atomCookies holds the three InternAtom requests while they are in flight.
-	//nolint:reusability // XGB's protocol cookies have concrete types rather than reusable domain layouts.
 	atomCookies struct {
 		check xproto.InternAtomCookie
 		name  xproto.InternAtomCookie
@@ -34,7 +33,6 @@ type (
 
 	// atomSet is those three atoms once the server has answered. Any of them
 	// may be zero, meaning this server does not know that name.
-	//nolint:reusability // These fields are XGB wire atoms, not a cross-package domain layout.
 	atomSet struct {
 		check xproto.Atom
 		name  xproto.Atom
@@ -43,7 +41,6 @@ type (
 
 	// property is the name and type of one X property to read. A zero name
 	// means there is no property to ask for.
-	//nolint:reusability // An XGB property is a protocol-specific atom pair.
 	property struct {
 		name xproto.Atom
 		typ  xproto.Atom
@@ -53,13 +50,30 @@ type (
 	connection struct {
 		*xgb.Conn
 
-		transport net.Conn
+		// Close releases the owned transport without waiting for protocol replies.
+		Close func()
 	}
 
 	// unauthenticatedConn adapts the initial setup for servers without a cookie.
 	unauthenticatedConn struct {
+		// Conn forwards reads and transport operations after the setup write.
 		net.Conn
 
 		started bool
+	}
+
+	// displayTarget contains the parsed socket address and screen selection.
+	displayTarget struct {
+		network string
+		address string
+		host    string
+		number  int
+		screen  int
+	}
+
+	// authorityRecord holds one Xauthority entry's family and counted fields.
+	authorityRecord struct {
+		fields [wordBytes][]byte
+		family uint16
 	}
 )

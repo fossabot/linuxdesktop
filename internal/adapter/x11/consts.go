@@ -4,6 +4,23 @@
 package x11
 
 const (
+	connectionErrorFormat     = "x11 connection: %w"
+	detailErrorFormat         = "%w: %s"
+	authorityValueErrorFormat = "read authority value: %w"
+	setupErrorFormat          = "write setup: %w"
+	setupHeaderBytes          = 12
+	authNameOffset            = 6
+	authEndOffset             = 10
+	dummyCookie               = "00000000000000000000000000000000"
+	x11TCPPort                = 6000
+	pathSeparator             = "/"
+	remoteNetwork             = "tcp"
+	authorityLocal            = 256
+	authorityWildcard         = 65535
+	cookieBytes               = 16
+	cookieProtocol            = "MIT-MAGIC-COOKIE-1"
+	authorityFilename         = ".Xauthority"
+	localhost                 = "localhost"
 	// EWMH and ICCCM atom names.
 	atomSupportingWMCheck = "_NET_SUPPORTING_WM_CHECK"
 	atomNetWMName         = "_NET_WM_NAME"
