@@ -275,12 +275,12 @@ func implName(fallback string, data []byte) string {
 // afterLastDot is the final element of a dotted D-Bus name, or "" when there is
 // no dot or nothing after it.
 func afterLastDot(name string) string {
-	idx := strings.LastIndexByte(name, dotByte)
-	if idx < zero {
+	_, after, ok := strings.CutLast(name, ".")
+	if !ok {
 		return noValue
 	}
 
-	return name[idx+dotWidth:]
+	return after
 }
 
 // uses is the desktop list a .portal file declares itself for.
