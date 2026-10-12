@@ -275,7 +275,7 @@ func implName(fallback string, data []byte) string {
 // afterLastDot is the final element of a dotted D-Bus name, or "" when there is
 // no dot or nothing after it.
 func afterLastDot(name string) string {
-	_, after, ok := strings.CutLast(name, ".")
+	_, after, ok := strings.CutLast(name, string(dotByte))
 	if !ok {
 		return noValue
 	}

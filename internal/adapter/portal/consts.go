@@ -42,9 +42,6 @@ const (
 	desktopSeparator = ":"
 	dotByte          = '.'
 
-	// dotWidth is the single byte a separating dot occupies.
-	dotWidth = 1
-
 	// expectedPaths is the capacity the portals.conf search list is built at:
 	// one per-user file, one per desktop token, and the system default.
 	expectedPaths = 4

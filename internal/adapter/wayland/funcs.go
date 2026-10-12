@@ -322,7 +322,7 @@ func converse(ctx context.Context, conn net.Conn) (globals []domain.WaylandGloba
 }
 
 func cancelConnection(conn net.Conn) {
-	//nolint:dogsled,errcheck,gosec // Cancellation is already the actionable error; close only interrupts I/O.
+	//nolint:errcheck,gosec // Cancellation is already the actionable error; close only interrupts I/O.
 	_ = conn.Close()
 }
 
