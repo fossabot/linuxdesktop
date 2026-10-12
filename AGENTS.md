@@ -1,4 +1,4 @@
-# Agent instructions
+# Agent Instructions
 
 ## Dependencies
 
