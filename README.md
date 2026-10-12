@@ -13,7 +13,7 @@ This repository provides a library; it does not install a command-line program.
 
 ## Installation
 
-Use Go **1.26.6 or newer**, as required by [go.mod](go.mod).
+Use Go **1.27.2 or newer**, as required by [go.mod](go.mod).
 Inside your application's Go module, add the dependency:
 
 ```sh
