@@ -2,6 +2,7 @@
 
 
 [![LICENSE](https://img.shields.io/github/license/gostafa/linuxdesktop)](/LICENSE) [![codecov](https://codecov.io/gh/gostafa/linuxdesktop/graph/badge.svg)](https://codecov.io/gh/gostafa/linuxdesktop) [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/gostafa/linuxdesktop?utm_source=badge) [![Go Reference](https://pkg.go.dev/badge/github.com/gostafa/linuxdesktop)](https://pkg.go.dev/github.com/gostafa/linuxdesktop)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgostafa%2Flinuxdesktop.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgostafa%2Flinuxdesktop?ref=badge_shield)
 
 
 A Go library for detecting the Linux desktop environment, login session, display
@@ -239,3 +240,7 @@ See [taskotter](taskotter/Taskfile.yml) for the included tooling tasks.
 Keep the public API in the root package; probe implementations live under
 `internal/`. Format changed Go files with `gofmt`, add relevant tests for behavior
 changes, and keep this README consistent with public options and defaults.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgostafa%2Flinuxdesktop.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgostafa%2Flinuxdesktop?ref=badge_large)
