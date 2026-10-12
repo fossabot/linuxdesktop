@@ -10,21 +10,27 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Run Tests
+      shell: bash
+      run: |
+        set -o pipefail
+        go test -race -v -coverprofile=coverage.out ./... 2>&1 | tee test-result.txt
     - name: Run CI
       shell: bash
       run: YAMLFIX_EXTRA_ARGS='--exclude ".github/workflows/**/*" --exclude "taskotter/**/*"' task taskotter:ci:fix
     - name: Create fix PR
-      uses: $/.github/actions/auto-fix
+      uses: ./.github/actions/auto-fix
       with:
         token: ${{ inputs.github-token }}
     - name: Run all CI checks
       shell: bash
       run: task taskotter:ci
-    - name: Run Tests
+    - name: Generate test report
+      if: ${{ !cancelled() && hashFiles('test-result.txt') != '' }}
       shell: bash
       run: task taskotter:go-junit-report:report
     - name: Upload coverage to Codecov
-      if: ${{ !cancelled() }}
+      if: ${{ !cancelled() && hashFiles('coverage.out') != '' }}
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f  # v7.0.0
       with:
         use_oidc: true
@@ -37,7 +43,7 @@ runs:
         fail_ci_if_error: true
         verbose: true
     - name: Upload test results to Codecov
-      if: ${{ !cancelled() }}
+      if: ${{ !cancelled() && hashFiles('junit.xml') != '' }}
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f  # v7.0.0
       with:
         use_oidc: true

@@ -116,12 +116,15 @@ func TestConcurrentEGLQueriesSerializeLifecycle(t *testing.T) {
 	loader := eglFixture()
 	prepareEGL(loader)
 	var active, maximum atomic.Int32
-	loader.functions["eglInitialize"] = func(uintptr, *int32, *int32) uint32 {
+	loader.functions[getStringSymbol] = func(name uint32) string {
 		current := active.Add(1)
 		maximum.Store(max(maximum.Load(), current))
-		return 1
+		defer active.Add(-1)
+		if name == glRenderer {
+			return "GL renderer"
+		}
+		return "GL value"
 	}
-	loader.functions["eglTerminate"] = func(uintptr) uint32 { active.Add(-1); return 1 }
 	cache := newBindingCache(func() (eglFuncs, bool) { return loadEGL(loader) })
 	var callers sync.WaitGroup
 	failures := make(chan error, 16)

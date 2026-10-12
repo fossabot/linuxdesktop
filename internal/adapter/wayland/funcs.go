@@ -16,6 +16,7 @@ import (
 	"strconv"
 
 	"github.com/gostafa/linuxdesktop/internal/domain"
+	"github.com/gostafa/linuxdesktop/internal/probe"
 	"github.com/gostafa/linuxdesktop/internal/sysfs"
 )
 
@@ -51,6 +52,8 @@ func Has(globals []domain.WaylandGlobal, iface string) bool {
 
 // Wayland connects to the compositor and enumerates its global registry. A nil
 // result with a nil error means there was no compositor to talk to.
+//
+//nolint:wrapcheck // Registry helpers already add the enumeration operation to errors.
 func detectWayland(ctx context.Context, env *domain.Env) (*domain.WaylandInfo, error) {
 	path := SocketPath(env)
 	if path == noValue {
@@ -58,8 +61,18 @@ func detectWayland(ctx context.Context, env *domain.Env) (*domain.WaylandInfo, e
 	}
 
 	globals, err := listen(ctx, path)
-	if err != nil {
-		return nil, fmt.Errorf("wayland: enumerate globals: %w", err)
+
+	return registryValues(env, globals, err)
+}
+
+//nolint:wrapcheck // enumerationValues supplies the diagnostic context while preserving partial data.
+func registryValues(
+	env *domain.Env,
+	globals []domain.WaylandGlobal,
+	err error,
+) (*domain.WaylandInfo, error) {
+	if err != nil && len(globals) == wireZero {
+		return enumerationValues[*domain.WaylandInfo](nil, err)
 	}
 
 	info := &domain.WaylandInfo{
@@ -69,6 +82,15 @@ func detectWayland(ctx context.Context, env *domain.Env) (*domain.WaylandInfo, e
 	}
 	if descriptor, ok := inheritedFD(env); ok {
 		info.SocketFD = descriptor
+	}
+
+	return enumerationValues(info, err)
+}
+
+// enumerationValues keeps usable registry events alongside a later failure.
+func enumerationValues[T any](info T, err error) (T, error) {
+	if err != nil {
+		return info, fmt.Errorf("wayland: enumerate globals: %w", err)
 	}
 
 	return info, nil
@@ -284,13 +306,28 @@ func listen(ctx context.Context, path string) ([]domain.WaylandGlobal, error) {
 }
 
 // converse bounds the connection, sends the handshake and reads the reply.
-func converse(ctx context.Context, conn net.Conn) ([]domain.WaylandGlobal, error) {
-	err := bound(ctx, conn)
-	if err != nil {
-		return nil, fmt.Errorf(errQueryRegistry, err)
-	}
+//
+//nolint:wrapcheck // converseWire wraps transport errors; context errors are wrapped by probe.
+func converse(ctx context.Context, conn net.Conn) (globals []domain.WaylandGlobal, failure error) {
+	stop := context.AfterFunc(ctx, func() { cancelConnection(conn) })
+	defer stop()
+	defer func() {
+		contextErr := probe.ContextError(ctx)
+		if contextErr != nil {
+			failure = contextErr
+		}
+	}()
 
-	err = handshake(conn)
+	return converseWire(ctx, conn)
+}
+
+func cancelConnection(conn net.Conn) {
+	//nolint:dogsled,errcheck,gosec // Cancellation is already the actionable error; close only interrupts I/O.
+	_ = conn.Close()
+}
+
+func converseWire(ctx context.Context, conn net.Conn) ([]domain.WaylandGlobal, error) {
+	err := prepareConnection(ctx, conn)
 	if err != nil {
 		return nil, fmt.Errorf(errQueryRegistry, err)
 	}
@@ -301,6 +338,25 @@ func converse(ctx context.Context, conn net.Conn) ([]domain.WaylandGlobal, error
 	}
 
 	return result, nil
+}
+
+func prepareConnection(ctx context.Context, conn net.Conn) error {
+	err := probe.ContextError(ctx)
+	if err != nil {
+		return fmt.Errorf(errQueryRegistry, err)
+	}
+
+	err = bound(ctx, conn)
+	if err != nil {
+		return fmt.Errorf(errQueryRegistry, err)
+	}
+
+	err = handshake(conn)
+	if err != nil {
+		return fmt.Errorf(errQueryRegistry, err)
+	}
+
+	return nil
 }
 
 // bound applies the caller's deadline to the connection, if it set one.

@@ -101,7 +101,7 @@ func name(scan *pciScan, indices []int, model string) {
 		scan.setModel(indices[i], model)
 	}
 
-	scan.left -= len(indices)
+	scan.left--
 }
 
 // run reads the listing, or as much of it as it takes to name every GPU that is

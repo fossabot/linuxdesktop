@@ -18,7 +18,7 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-func serverConnection(t *testing.T, mode string) *xgb.Conn {
+func serverConnection(t *testing.T, mode string) *connection {
 	t.Helper()
 	client, server := net.Pipe()
 	go func() { defer server.Close(); serve(server, mode) }()
@@ -26,8 +26,9 @@ func serverConnection(t *testing.T, mode string) *xgb.Conn {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(conn.Close)
-	return conn
+	owned := &connection{Conn: conn, transport: client}
+	t.Cleanup(owned.Close)
+	return owned
 }
 
 func serve(conn net.Conn, mode string) {
@@ -134,7 +135,7 @@ func TestDisplayProtocol(t *testing.T) {
 			info, err := queryDisplay(
 				ctx,
 				&domain.Env{Display: ":fixture"},
-				func(string) (*xgb.Conn, error) { return conn, nil },
+				func(string) (*connection, error) { return conn, nil },
 			)
 			if err != nil || info.Vendor != "fixture" || info.ProtocolMajor != 11 ||
 				len(info.Extensions) != 1 ||
@@ -199,7 +200,7 @@ func TestCancellationWatcher(t *testing.T) {
 	close(stop)
 	watch(t.Context(), conn, stop)
 	errorConn := serverConnection(t, "error")
-	if textProperty(errorConn, 42, legacyProperty()) != "" {
+	if textProperty(errorConn.Conn, 42, legacyProperty()) != "" {
 		t.Fatal("failed property returned text")
 	}
 }
@@ -208,7 +209,7 @@ func TestOversizedAtom(t *testing.T) {
 	t.Parallel()
 	conn := serverConnection(t, "name")
 	name := strings.Repeat("a", math.MaxUint16+1)
-	if atomOf(internAtom(conn, name)) != zero {
+	if atomOf(internAtom(conn.Conn, name)) != zero {
 		t.Fatal("oversized atom was sent to the server")
 	}
 }

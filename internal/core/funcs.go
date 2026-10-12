@@ -114,6 +114,10 @@ func processSection(eng *detector) domain.Section {
 
 // publish writes the finished sections the caller asked for.
 func publish(eng *detector, gather *collector, display *domain.DisplayInfo) {
+	if wants(eng, domain.SectionDesktop) {
+		gather.out.Desktop = gather.desktop
+	}
+
 	if wants(eng, sectionDisplayProbes) {
 		// Headless is only meaningful once the display probes have run;
 		// asserting it from a run that skipped them would be a lie.
@@ -307,7 +311,7 @@ func plainProbe[P, T any](
 	}
 }
 
-func desktopTarget(gather *collector) *domain.DesktopInfo  { return &gather.out.Desktop }
+func desktopTarget(gather *collector) *domain.DesktopInfo  { return &gather.desktop }
 func osTarget(gather *collector) *domain.OSInfo            { return &gather.out.OS }
 func portalTarget(gather *collector) *domain.PortalInfo    { return &gather.out.Portal }
 func processTarget(gather *collector) *[]string            { return &gather.sig.Processes }
@@ -379,7 +383,7 @@ func recordProtocols(gather *collector) {
 func summarize(gather *collector, display *domain.DisplayInfo) {
 	sig := gather.sig
 
-	sig.Desktop = gather.out.Desktop.Environment
+	sig.Desktop = gather.desktop.Environment
 	sig.X11Reachable = display.X11Available
 	sig.WaylandReachable = display.WaylandAvailable
 

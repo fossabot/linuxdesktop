@@ -95,8 +95,6 @@ func populateBoundGL(info *domain.OpenGLInfo, egl *eglFuncs) bool {
 		return false
 	}
 
-	defer egl.terminate(display)
-
 	*info = displayInfo(egl, display)
 	mergeCurrent(info, egl, display)
 
@@ -104,21 +102,49 @@ func populateBoundGL(info *domain.OpenGLInfo, egl *eglFuncs) bool {
 }
 
 func initializeDisplay(egl *eglFuncs) (uintptr, bool) {
-	display := egl.getDisplay(zero)
+	display := retainedDisplay(egl)
+	if display != zero {
+		return display, true
+	}
+
+	display = egl.getDisplay(zero)
 	if display == zero {
 		return display, false
 	}
 
+	initialized := initializeEGL(egl, display)
+	if initialized {
+		rememberDisplay(egl, display)
+	}
+
+	return display, initialized
+}
+
+func initializeEGL(egl *eglFuncs, display uintptr) bool {
 	var major, minor int32
 
-	return display, egl.initialize(display, &major, &minor) != zero
+	return egl.initialize(display, &major, &minor) != zero
+}
+
+func retainedDisplay(egl *eglFuncs) uintptr {
+	if egl.displayState == nil {
+		return zero
+	}
+
+	return egl.displayState.display
+}
+
+func rememberDisplay(egl *eglFuncs, display uintptr) {
+	if egl.displayState != nil {
+		egl.displayState.display = display
+	}
 }
 
 func displayInfo(egl *eglFuncs, display uintptr) domain.OpenGLInfo {
 	return domain.OpenGLInfo{
 		Available: true,
 		Vendor:    egl.queryString(display, eglVendor),
-		Version:   egl.queryString(display, eglVersion),
+		Version:   "",
 		Renderer:  "",
 	}
 }
@@ -144,6 +170,11 @@ func preferLive(known, live string) string {
 
 // currentGL tries desktop OpenGL before OpenGL ES.
 func currentGL(egl *eglFuncs, display uintptr) (domain.OpenGLInfo, bool) {
+	if egl.queryAPI != nil {
+		state := snapshotEGLState(egl)
+		defer restoreEGLState(egl, display, &state)
+	}
+
 	apis := []clientAPI{
 		{[]int32{eglNone}, eglOpenGLAPI, eglOpenGLBit},
 		{[]int32{eglContextVersion, eglESVersion, eglNone}, eglOpenGLESAPI, eglOpenGLES2Bit},
@@ -157,6 +188,23 @@ func currentGL(egl *eglFuncs, display uintptr) (domain.OpenGLInfo, bool) {
 	var empty domain.OpenGLInfo
 
 	return empty, false
+}
+
+func snapshotEGLState(egl *eglFuncs) eglThreadState {
+	return eglThreadState{
+		api: egl.queryAPI(), display: egl.currentDisplay(), context: egl.currentContext(),
+		draw: egl.currentSurface(eglDraw), read: egl.currentSurface(eglRead),
+	}
+}
+
+func restoreEGLState(egl *eglFuncs, display uintptr, state *eglThreadState) {
+	egl.bindAPI(state.api)
+
+	if state.display == zero {
+		state.display = display
+	}
+
+	egl.makeCurrent(state.display, state.draw, state.read, state.context)
 }
 
 func tryAPI(egl *eglFuncs, display uintptr, api *clientAPI) (domain.OpenGLInfo, bool) {
@@ -273,6 +321,8 @@ func eglBindings(loader library) (egl eglFuncs, ok bool) {
 func boundEGL(loader library, lib uintptr) eglFuncs {
 	egl := new(eglFuncs)
 
+	egl.displayState = new(eglDisplayState)
+
 	egl.bindString = func(address uintptr) func(uint32) string {
 		var getString func(uint32) string
 
@@ -324,16 +374,19 @@ func bindEGL(egl *eglFuncs, loader library, lib uintptr) {
 
 func eglTargets(egl *eglFuncs) map[string]any {
 	return map[string]any{
-		"eglGetDisplay":     &egl.getDisplay,
-		"eglInitialize":     &egl.initialize,
-		"eglQueryString":    &egl.queryString,
-		"eglBindAPI":        &egl.bindAPI,
-		"eglChooseConfig":   &egl.chooseConfig,
-		"eglCreateContext":  &egl.createContext,
-		"eglMakeCurrent":    &egl.makeCurrent,
-		"eglDestroyContext": &egl.destroyContext,
-		"eglTerminate":      &egl.terminate,
-		"eglGetProcAddress": &egl.getProcAddress,
+		"eglQueryAPI":          &egl.queryAPI,
+		"eglGetCurrentDisplay": &egl.currentDisplay,
+		"eglGetCurrentContext": &egl.currentContext,
+		"eglGetCurrentSurface": &egl.currentSurface,
+		"eglGetDisplay":        &egl.getDisplay,
+		"eglInitialize":        &egl.initialize,
+		"eglQueryString":       &egl.queryString,
+		"eglBindAPI":           &egl.bindAPI,
+		"eglChooseConfig":      &egl.chooseConfig,
+		"eglCreateContext":     &egl.createContext,
+		"eglMakeCurrent":       &egl.makeCurrent,
+		"eglDestroyContext":    &egl.destroyContext,
+		"eglGetProcAddress":    &egl.getProcAddress,
 	}
 }
 

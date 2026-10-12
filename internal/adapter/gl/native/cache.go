@@ -36,7 +36,7 @@ var (
 	vulkanBindings = newBindingCache(
 		func() (vulkanFuncs, bool) { return loadVulkan(systemLibrary{}) },
 	)
-	//nolint:gochecknoglobals // EGL display initialization and termination must be serialized across calls.
+	//nolint:gochecknoglobals // Shared EGL display initialization and queries must be serialized across calls.
 	eglLifecycle sync.Mutex
 )
 

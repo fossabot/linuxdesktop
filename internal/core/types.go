@@ -114,6 +114,7 @@ type (
 		sig     *S
 		x11     *X
 		wayland *W
+		desktop domain.DesktopInfo
 		failed  []error
 		wait    sync.WaitGroup
 		lock    sync.Mutex

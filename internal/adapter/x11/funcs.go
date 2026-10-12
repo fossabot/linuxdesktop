@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gostafa/linuxdesktop/internal/domain"
+	"github.com/gostafa/linuxdesktop/internal/probe"
 	"github.com/gostafa/linuxdesktop/internal/sysfs"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
@@ -38,19 +39,30 @@ func Available(env *domain.Env) bool {
 // X11 connects to $DISPLAY and reports what the server says about itself. A
 // nil result with a nil error means there was no X server to talk to, which on
 // a pure Wayland or headless session is the expected outcome.
+//
+//nolint:wrapcheck // queryValues supplies the query diagnostic while preserving partial metadata.
 func detectX11(ctx context.Context, env *domain.Env) (*domain.X11Info, error) {
-	result, err := queryDisplay(ctx, env, xgb.NewConnDisplay)
-	if err != nil {
-		return nil, fmt.Errorf("x11: query display: %w", err)
-	}
+	result, err := queryDisplay(ctx, env, func(display string) (*connection, error) {
+		return connectDisplay(ctx, display)
+	})
 
-	return result, nil
+	return queryValues(result, err)
 }
 
+// queryValues preserves metadata collected before a query failed.
+func queryValues[T any](info T, err error) (T, error) {
+	if err != nil {
+		return info, fmt.Errorf("x11: query display: %w", err)
+	}
+
+	return info, nil
+}
+
+//nolint:wrapcheck // queryValues adds the query operation to cancellation errors.
 func queryDisplay(
 	ctx context.Context,
 	env *domain.Env,
-	connect func(string) (*xgb.Conn, error),
+	connect func(string) (*connection, error),
 ) (*domain.X11Info, error) {
 	if env.Display == noValue {
 		var absent *domain.X11Info
@@ -63,10 +75,12 @@ func queryDisplay(
 		return nil, fmt.Errorf("x11: connect display: %w", err)
 	}
 
-	return queryConnection(ctx, conn, env.Display), nil
+	info := queryConnection(ctx, conn, env.Display)
+
+	return queryValues(info, probe.ContextError(ctx))
 }
 
-func queryConnection(ctx context.Context, conn *xgb.Conn, display string) *domain.X11Info {
+func queryConnection(ctx context.Context, conn *connection, display string) *domain.X11Info {
 	defer conn.Close()
 
 	// xgb's Reply blocks indefinitely, so cancellation is expressed by closing
@@ -74,7 +88,7 @@ func queryConnection(ctx context.Context, conn *xgb.Conn, display string) *domai
 	stop := watchConnection(ctx, conn)
 	defer close(stop)
 
-	return describe(conn, display)
+	return describe(conn.Conn, display)
 }
 
 // resolve reads the three atoms back off the wire. Any the server does not know
@@ -130,7 +144,7 @@ func remote(host string) bool {
 
 // watch closes the connection when the caller gives up, which is the only way
 // to interrupt a blocked xgb reply.
-func watch(ctx context.Context, conn *xgb.Conn, stop <-chan struct{}) {
+func watch(ctx context.Context, conn *connection, stop <-chan struct{}) {
 	select {
 	case <-ctx.Done():
 		conn.Close()
@@ -293,7 +307,7 @@ func atomOf(cookie xproto.InternAtomCookie) xproto.Atom {
 	return reply.Atom
 }
 
-func watchConnection(ctx context.Context, conn *xgb.Conn) chan struct{} {
+func watchConnection(ctx context.Context, conn *connection) chan struct{} {
 	stop := make(chan struct{})
 
 	go watch(ctx, conn, stop)

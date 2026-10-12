@@ -14,7 +14,13 @@ type (
 	systemLibrary struct{}
 
 	// eglFuncs holds the entry points the OpenGL probe binds.
+	//nolint:reusability // EGL function signatures and retained native display state are protocol-specific.
 	eglFuncs struct {
+		displayState   *eglDisplayState
+		queryAPI       func() uint32
+		currentDisplay func() uintptr
+		currentContext func() uintptr
+		currentSurface func(int32) uintptr
 		bindString     func(uintptr) func(uint32) string
 		getDisplay     func(uintptr) uintptr
 		initialize     func(uintptr, *int32, *int32) uint32
@@ -24,8 +30,14 @@ type (
 		createContext  func(uintptr, uintptr, uintptr, *int32) uintptr
 		makeCurrent    func(uintptr, uintptr, uintptr, uintptr) uint32
 		destroyContext func(uintptr, uintptr) uint32
-		terminate      func(uintptr) uint32
 		getProcAddress func(string) uintptr
+	}
+	// eglDisplayState retains the shared display without claiming ownership of it.
+	eglDisplayState struct{ display uintptr }
+	// eglThreadState captures the application's current bindings before probing.
+	eglThreadState struct {
+		api                          uint32
+		display, context, draw, read uintptr
 	}
 
 	// clientAPI is one of the two rendering APIs the probe will try, in order.

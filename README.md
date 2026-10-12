@@ -151,12 +151,15 @@ To request live graphics details, include `SectionGraphics` and add
 default filesystem probe. A compositor identified by the process-scan fallback
 is reported with `ConfidenceLow`.
 
-Successful EGL and Vulkan library handles and static function bindings are
-reused for the process lifetime. Graphics values and EGL contexts are queried
-fresh on each native probe; failed library loads can be retried on a later call.
-EGL probe lifecycles are serialized to avoid overlapping initialization and
-termination of a shared display. A native driver call already in progress cannot
-be interrupted by the Go context.
+Successful EGL and Vulkan library handles, static function bindings, and the
+initialized default EGL display are retained for the process lifetime. The
+display may be shared with the host application, so detection never terminates
+it. Graphics values and probe-owned EGL contexts are queried fresh on each
+native probe; failed loads or initialization can be retried on a later call.
+EGL queries are serialized and restore the thread's previous EGL state. An
+OpenGL version is reported only when the driver provides a GL version string.
+Display transport operations respond to context cancellation; a native driver
+call already in progress cannot be interrupted by the Go context.
 
 ## Results and Convenience Helpers
 
@@ -214,6 +217,9 @@ git clone https://github.com/gostafa/linuxdesktop.git
 cd linuxdesktop
 go mod download
 ```
+
+Dependencies are pinned in `go.mod`. The X11 adapter uses upstream XGB with
+project-owned transport cancellation and authentication selection.
 
 Run the tests and static checks:
 

@@ -14,8 +14,7 @@ const (
 	libVulkan          = "libvulkan.so.1"
 
 	// EGL enumerants.
-	eglVendor  int32 = 0x3053
-	eglVersion int32 = 0x3054
+	eglVendor int32 = 0x3053
 
 	eglOpenGLAPI   uint32 = 0x30A2
 	eglOpenGLESAPI uint32 = 0x30A0
@@ -26,6 +25,8 @@ const (
 	eglOpenGLES2Bit   int32 = 0x0004
 	eglContextVersion int32 = 0x3098
 	eglNone           int32 = 0x3038
+	eglDraw           int32 = 0x3059
+	eglRead           int32 = 0x305A
 
 	// OpenGL enumerants.
 	glVendor   uint32 = 0x1F00

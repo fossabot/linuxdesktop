@@ -78,8 +78,12 @@ func TestVulkanLoader(t *testing.T) {
 
 func eglFixture() *fakeLibrary {
 	return &fakeLibrary{loaded: true, functions: map[string]any{
-		"eglGetDisplay": func(uintptr) uintptr { return 7 },
-		"eglInitialize": func(uintptr, *int32, *int32) uint32 { return 1 },
+		"eglGetDisplay":        func(uintptr) uintptr { return 7 },
+		"eglQueryAPI":          func() uint32 { return eglOpenGLESAPI },
+		"eglGetCurrentDisplay": func() uintptr { return 0 },
+		"eglGetCurrentContext": func() uintptr { return 0 },
+		"eglGetCurrentSurface": func(int32) uintptr { return 0 },
+		"eglInitialize":        func(uintptr, *int32, *int32) uint32 { return 1 },
 		"eglQueryString": func(_ uintptr, name int32) string {
 			if name == eglVendor {
 				return "EGL vendor"
@@ -146,7 +150,7 @@ func TestOpenGLLoader(t *testing.T) {
 	if info, ok := detectOpenGL(loader); !ok || info != want {
 		t.Fatalf("info = %+v, ok = %v", info, ok)
 	}
-	if !reflect.DeepEqual(cleanup, []string{"release", "destroy", "terminate"}) {
+	if !reflect.DeepEqual(cleanup, []string{"release", "destroy", "release"}) {
 		t.Fatal(cleanup)
 	}
 }
@@ -166,7 +170,7 @@ func TestOpenGLFailures(t *testing.T) {
 		{name: "driver panic", change: func(f *fakeLibrary) { f.functions["eglQueryString"] = func(uintptr, int32) string { panic("driver") } }},
 		{
 			name: "missing GL symbol", change: func(f *fakeLibrary) { delete(f.functions, getStringSymbol) },
-			want: domain.OpenGLInfo{Available: true, Vendor: "EGL vendor", Version: "EGL version"}, ok: true,
+			want: domain.OpenGLInfo{Available: true, Vendor: "EGL vendor", Version: ""}, ok: true,
 		},
 		{name: "empty live vendor and version", change: func(f *fakeLibrary) {
 			f.functions[getStringSymbol] = func(name uint32) string {
@@ -175,7 +179,7 @@ func TestOpenGLFailures(t *testing.T) {
 				}
 				return ""
 			}
-		}, want: domain.OpenGLInfo{Available: true, Vendor: "EGL vendor", Version: "EGL version", Renderer: "renderer"}, ok: true},
+		}, want: domain.OpenGLInfo{Available: true, Vendor: "EGL vendor", Version: "", Renderer: "renderer"}, ok: true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
