@@ -249,7 +249,7 @@ linters:
       toolchain-pattern: a^
       tool-forbidden: true
       go-debug-forbidden: true
-      go-version-pattern: '^1\.27\.\d+$'
+      go-version-pattern: ^1\.27\.\d+$
     gosec:
       includes: []
       excludes: []
